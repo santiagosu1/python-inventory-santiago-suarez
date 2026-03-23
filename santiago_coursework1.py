@@ -16,6 +16,13 @@ def generate_product_id():
     return new_id
 
 
+def find_product_by_name(name):
+    for product_id, item in inventory.items():
+        if item["name"].lower() == name.lower():
+            return product_id
+    return None
+
+
 def add_item():
     print("\nAdd New Item")
     print("--------------------")
@@ -45,16 +52,6 @@ def add_item():
     print("\nItem added successfully!")
 
 
-def display_menu():
-    print("\nWelcome to the Inventory Management System!")
-    print("===========================================")
-    print("1. Add Item")
-    print("2. View Inventory")
-    print("3. Update Item")
-    print("4. Remove Item")
-    print("5. Exit")
-
-
 def view_inventory():
     print("\nCurrent Inventory:")
     print("--------------------")
@@ -68,6 +65,50 @@ def view_inventory():
             print()
 
 
+def update_item():
+    print("\nUpdate Item")
+    print("--------------------")
+
+    name = input("Enter product name to update: ").strip()
+    product_id = find_product_by_name(name)
+
+    if product_id is None:
+        print("Product not found.")
+    else:
+        new_quantity = int(input("Enter new quantity: ").strip())
+        new_price = float(input("Enter new price: ").strip())
+
+        inventory[product_id]["quantity"] = new_quantity
+        inventory[product_id]["price"] = new_price
+
+        print("\nInventory updated successfully!")
+
+
+def remove_item():
+    print("\nRemove Item")
+    print("--------------------")
+
+    name = input("Enter product name to remove: ").strip()
+    product_id = find_product_by_name(name)
+
+    if product_id is None:
+        print("Product not found.")
+    else:
+        removed_product = inventory.pop(product_id)
+        product_ids.remove(product_id)
+        print(f"\n{removed_product['name']} removed successfully!")
+
+
+def display_menu():
+    print("\nWelcome to the Inventory Management System!")
+    print("===========================================")
+    print("1. Add Item")
+    print("2. View Inventory")
+    print("3. Update Item")
+    print("4. Remove Item")
+    print("5. Exit")
+
+
 def main():
     while True:
         display_menu()
@@ -78,9 +119,9 @@ def main():
         elif choice == "2":
             view_inventory()
         elif choice == "3":
-            print("Update Item option selected.")
+            update_item()
         elif choice == "4":
-            print("Remove Item option selected.")
+            remove_item()
         elif choice == "5":
             print("Exiting system. Goodbye!")
             break
