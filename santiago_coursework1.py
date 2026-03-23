@@ -72,9 +72,24 @@ def add_item():
         print("-", category)
 
     category = input("Enter category: ").strip().title()
+
+    if category not in categories:
+        print("Invalid category. Item was not added.")
+        return
+
     brand = input("Enter brand name: ").strip().title()
-    quantity = int(input("Enter quantity: ").strip())
-    price = float(input("Enter price: ").strip())
+
+    try:
+        quantity = int(input("Enter quantity: ").strip())
+        price = float(input("Enter price: ").strip())
+    except ValueError:
+        print("Invalid quantity or price. Please enter numbers only.")
+        return
+
+    if quantity < 0 or price < 0:
+        print("Quantity and price must be non-negative.")
+        return
+
     product_type = input("Is this a perishable product? (yes/no): ").strip().lower()
 
     product_id = generate_product_id()
@@ -86,7 +101,6 @@ def add_item():
         product = Product(product_id, name, category, brand, quantity, price)
 
     inventory[product_id] = product
-
     print("\nItem added successfully!")
 
 
@@ -96,10 +110,11 @@ def view_inventory():
 
     if len(inventory) == 0:
         print("Inventory is empty.")
-    else:
-        for product in inventory.values():
-            product.display_product()
-            print()
+        return
+
+    for product in inventory.values():
+        product.display_product()
+        print()
 
 
 def update_item():
@@ -111,11 +126,21 @@ def update_item():
 
     if product_id is None:
         print("Product not found.")
-    else:
+        return
+
+    try:
         new_quantity = int(input("Enter new quantity: ").strip())
         new_price = float(input("Enter new price: ").strip())
-        inventory[product_id].update_product(new_quantity, new_price)
-        print("\nInventory updated successfully!")
+    except ValueError:
+        print("Invalid input. Quantity must be an integer and price must be a number.")
+        return
+
+    if new_quantity < 0 or new_price < 0:
+        print("Quantity and price must be non-negative.")
+        return
+
+    inventory[product_id].update_product(new_quantity, new_price)
+    print("\nInventory updated successfully!")
 
 
 def remove_item():
@@ -127,10 +152,11 @@ def remove_item():
 
     if product_id is None:
         print("Product not found.")
-    else:
-        removed_product = inventory.pop(product_id)
-        product_ids.remove(product_id)
-        print(f"\n{removed_product.name} removed successfully!")
+        return
+
+    removed_product = inventory.pop(product_id)
+    product_ids.remove(product_id)
+    print(f"\n{removed_product.name} removed successfully!")
 
 
 def save_inventory_to_file():
