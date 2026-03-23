@@ -7,6 +7,8 @@ sample_price = 799.99
 categories = ["Electronics", "Home", "Office", "Food"]
 product_ids = set()
 
+FILE_NAME = "inventory.txt"
+
 
 class Product:
     def __init__(self, product_id, name, category, brand, quantity, price):
@@ -27,6 +29,9 @@ class Product:
         print(f"ID: {self.product_id} | Name: {self.name} | Brand: {self.brand[0]} | Category: {self.category}")
         print(f"Price: ${self.price:.2f} | Quantity: {self.quantity}")
 
+    def to_file_string(self):
+        return f"{self.product_id}|{self.name}|{self.category}|{self.brand[0]}|{self.quantity}|{self.price}|Normal"
+
 
 class PerishableProduct(Product):
     def __init__(self, product_id, name, category, brand, quantity, price, expiration_date):
@@ -36,6 +41,9 @@ class PerishableProduct(Product):
     def display_product(self):
         super().display_product()
         print(f"Expiration Date: {self.expiration_date}")
+
+    def to_file_string(self):
+        return f"{self.product_id}|{self.name}|{self.category}|{self.brand[0]}|{self.quantity}|{self.price}|Perishable|{self.expiration_date}"
 
 
 def generate_product_id():
@@ -125,6 +133,40 @@ def remove_item():
         print(f"\n{removed_product.name} removed successfully!")
 
 
+def save_inventory_to_file():
+    with open(FILE_NAME, "w") as file:
+        for product in inventory.values():
+            file.write(product.to_file_string() + "\n")
+
+
+def load_inventory_from_file():
+    try:
+        with open(FILE_NAME, "r") as file:
+            for line in file:
+                parts = line.strip().split("|")
+
+                if len(parts) >= 7:
+                    product_id = int(parts[0])
+                    name = parts[1]
+                    category = parts[2]
+                    brand = parts[3]
+                    quantity = int(parts[4])
+                    price = float(parts[5])
+                    product_type = parts[6]
+
+                    product_ids.add(product_id)
+
+                    if product_type == "Perishable" and len(parts) == 8:
+                        expiration_date = parts[7]
+                        product = PerishableProduct(product_id, name, category, brand, quantity, price, expiration_date)
+                    else:
+                        product = Product(product_id, name, category, brand, quantity, price)
+
+                    inventory[product_id] = product
+    except FileNotFoundError:
+        pass
+
+
 def display_menu():
     print("\nWelcome to the Inventory Management System!")
     print("===========================================")
@@ -136,6 +178,8 @@ def display_menu():
 
 
 def main():
+    load_inventory_from_file()
+
     while True:
         display_menu()
         choice = input("Select an option: ").strip()
@@ -149,6 +193,8 @@ def main():
         elif choice == "4":
             remove_item()
         elif choice == "5":
+            print("\nSaving inventory to file...")
+            save_inventory_to_file()
             print("Exiting system. Goodbye!")
             break
         else:
