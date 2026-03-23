@@ -8,6 +8,43 @@ categories = ["Electronics", "Home", "Office"]
 product_ids = set()
 
 
+def generate_product_id():
+    new_id = 101
+    while new_id in product_ids:
+        new_id += 1
+    product_ids.add(new_id)
+    return new_id
+
+
+def add_item():
+    print("\nAdd New Item")
+    print("--------------------")
+
+    name = input("Enter product name: ").strip().title()
+
+    print("Available categories:")
+    for category in categories:
+        print("-", category)
+
+    category = input("Enter category: ").strip().title()
+    brand = input("Enter brand name: ").strip().title()
+    quantity = int(input("Enter quantity: ").strip())
+    price = float(input("Enter price: ").strip())
+
+    product_id = generate_product_id()
+    brand_tuple = (brand,)
+
+    inventory[product_id] = {
+        "name": name,
+        "category": category,
+        "brand": brand_tuple[0],
+        "quantity": quantity,
+        "price": price
+    }
+
+    print("\nItem added successfully!")
+
+
 def display_menu():
     print("\nWelcome to the Inventory Management System!")
     print("===========================================")
@@ -37,7 +74,7 @@ def main():
         choice = input("Select an option: ").strip()
 
         if choice == "1":
-            print("Add Item option selected.")
+            add_item()
         elif choice == "2":
             view_inventory()
         elif choice == "3":
