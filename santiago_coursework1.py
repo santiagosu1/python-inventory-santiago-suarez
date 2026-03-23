@@ -4,8 +4,38 @@ sample_name = "Laptop"
 sample_quantity = 5
 sample_price = 799.99
 
-categories = ["Electronics", "Home", "Office"]
+categories = ["Electronics", "Home", "Office", "Food"]
 product_ids = set()
+
+
+class Product:
+    def __init__(self, product_id, name, category, brand, quantity, price):
+        self.product_id = product_id
+        self.name = name
+        self.category = category
+        self.brand = (brand,)
+        self.quantity = quantity
+        self.price = price
+
+    def update_product(self, new_quantity=None, new_price=None):
+        if new_quantity is not None:
+            self.quantity = new_quantity
+        if new_price is not None:
+            self.price = new_price
+
+    def display_product(self):
+        print(f"ID: {self.product_id} | Name: {self.name} | Brand: {self.brand[0]} | Category: {self.category}")
+        print(f"Price: ${self.price:.2f} | Quantity: {self.quantity}")
+
+
+class PerishableProduct(Product):
+    def __init__(self, product_id, name, category, brand, quantity, price, expiration_date):
+        super().__init__(product_id, name, category, brand, quantity, price)
+        self.expiration_date = expiration_date
+
+    def display_product(self):
+        super().display_product()
+        print(f"Expiration Date: {self.expiration_date}")
 
 
 def generate_product_id():
@@ -17,8 +47,8 @@ def generate_product_id():
 
 
 def find_product_by_name(name):
-    for product_id, item in inventory.items():
-        if item["name"].lower() == name.lower():
+    for product_id, product in inventory.items():
+        if product.name.lower() == name.lower():
             return product_id
     return None
 
@@ -37,17 +67,17 @@ def add_item():
     brand = input("Enter brand name: ").strip().title()
     quantity = int(input("Enter quantity: ").strip())
     price = float(input("Enter price: ").strip())
+    product_type = input("Is this a perishable product? (yes/no): ").strip().lower()
 
     product_id = generate_product_id()
-    brand_tuple = (brand,)
 
-    inventory[product_id] = {
-        "name": name,
-        "category": category,
-        "brand": brand_tuple[0],
-        "quantity": quantity,
-        "price": price
-    }
+    if product_type == "yes":
+        expiration_date = input("Enter expiration date (YYYY-MM-DD): ").strip()
+        product = PerishableProduct(product_id, name, category, brand, quantity, price, expiration_date)
+    else:
+        product = Product(product_id, name, category, brand, quantity, price)
+
+    inventory[product_id] = product
 
     print("\nItem added successfully!")
 
@@ -59,9 +89,8 @@ def view_inventory():
     if len(inventory) == 0:
         print("Inventory is empty.")
     else:
-        for product_id, item in inventory.items():
-            print(f"ID: {product_id} | Name: {item['name']} | Brand: {item['brand']} | Category: {item['category']}")
-            print(f"Price: ${item['price']:.2f} | Quantity: {item['quantity']}")
+        for product in inventory.values():
+            product.display_product()
             print()
 
 
@@ -77,10 +106,7 @@ def update_item():
     else:
         new_quantity = int(input("Enter new quantity: ").strip())
         new_price = float(input("Enter new price: ").strip())
-
-        inventory[product_id]["quantity"] = new_quantity
-        inventory[product_id]["price"] = new_price
-
+        inventory[product_id].update_product(new_quantity, new_price)
         print("\nInventory updated successfully!")
 
 
@@ -96,7 +122,7 @@ def remove_item():
     else:
         removed_product = inventory.pop(product_id)
         product_ids.remove(product_id)
-        print(f"\n{removed_product['name']} removed successfully!")
+        print(f"\n{removed_product.name} removed successfully!")
 
 
 def display_menu():
